@@ -1,11 +1,13 @@
-const { createServer } = require('http')
-const { parse } = require('url')
-const { networkInterfaces } = require('os')
-const next = require('next')
+import { createServer } from 'http'
+import { parse } from 'url'
+import next from 'next'
+import { networkInterfaces } from 'os'
+
+import { Server } from 'socket.io'
 
 const dev = process.env.NODE_ENV !== 'production'
 const hostname = 'localhost'
-const port = 3000
+const port = parseInt(process.env.PORT || '3000', 10)
 // when using middleware `hostname` and `port` must be provided below
 const app = next({ dev, hostname, port })
 const handle = app.getRequestHandler()
@@ -14,7 +16,7 @@ const nets = networkInterfaces()
 const netsResults = Object.create(null)
 
 for (const name of Object.keys(nets)) {
-  for (const net of nets[name]) {
+  for (const net of nets[name] || []) {
     // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
     // 'IPv4' is in Node <= 17, from 18 it's a number 4 or 6
     const familyV4Value = typeof net.family === 'string' ? 'IPv4' : 4
@@ -28,11 +30,11 @@ for (const name of Object.keys(nets)) {
 }
 
 app.prepare().then(() => {
-  createServer(async (req, res) => {
+  const httpServer = createServer(async (req, res) => {
     try {
       // Be sure to pass `true` as the second argument to `url.parse`.
       // This tells it to parse the query portion of the URL.
-      const parsedUrl = parse(req.url, true)
+      const parsedUrl = parse(req.url || '', true)
       const { pathname, query } = parsedUrl
 
       if (pathname === '/a') {
@@ -47,14 +49,24 @@ app.prepare().then(() => {
       res.statusCode = 500
       res.end('internal server error')
     }
+  }).once('error', (err) => {
+    console.error(err)
+    process.exit(1)
   })
-    .once('error', (err) => {
-      console.error(err)
-      process.exit(1)
-    })
-    .listen(port, () => {
-      console.log(
-        `> Ready on http://${hostname}:${port} http://${netsResults.en0[0]}:${port}`
-      )
-    })
+
+  const io = new Server(httpServer, {})
+
+  io.on('connection', (socket) => {
+    const createdMessage = (msg: []) => {
+      socket.broadcast.emit('newIncomingMessage', msg)
+    }
+
+    socket.on('createdMessage', createdMessage)
+  })
+
+  httpServer.listen(port, () => {
+    console.log(
+      `> Ready on http://${hostname}:${port} http://${netsResults.en0[0]}:${port}`
+    )
+  })
 })
