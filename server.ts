@@ -1,8 +1,10 @@
 import { createServer } from 'http'
 import { parse } from 'url'
 import next from 'next'
-import { networkInterfaces } from 'os'
 
+import { networkInterfaces } from 'os'
+import { SerialPort } from 'serialport'
+import { ReadlineParser } from '@serialport/parser-readline'
 import { Server } from 'socket.io'
 
 const dev = process.env.NODE_ENV !== 'production'
@@ -14,7 +16,6 @@ const handle = app.getRequestHandler()
 
 const nets = networkInterfaces()
 const netsResults = Object.create(null)
-
 for (const name of Object.keys(nets)) {
   for (const net of nets[name] || []) {
     // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
@@ -55,13 +56,38 @@ app.prepare().then(() => {
   })
 
   const io = new Server(httpServer, {})
-
   io.on('connection', (socket) => {
     const createdMessage = (msg: []) => {
       socket.broadcast.emit('newIncomingMessage', msg)
     }
 
     socket.on('createdMessage', createdMessage)
+  })
+
+  const serialPort = new SerialPort({
+    path: '/dev/cu.usbserial-0001',
+    baudRate: 115200,
+  })
+  const parser = serialPort.pipe(new ReadlineParser({ delimiter: '\r\n' }))
+  parser.on('data', (data) => {
+    const [key, value] = data.split('=')
+
+    if (key === 'stopwatchTime') {
+      io.emit('stopwatchTime', value)
+    }
+
+    if (key === 'lapA') {
+      io.emit('lapA', value)
+    }
+
+    if (key === 'lapB') {
+      io.emit('lapB', value)
+    }
+
+    if (key === 'lapC') {
+      io.emit('lapC', value)
+    }
+    // io.emit('newIncomingMessage', { author: 'ARDUINO', message: data })
   })
 
   httpServer.listen(port, () => {
