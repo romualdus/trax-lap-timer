@@ -32,16 +32,21 @@ export default function Home() {
       setLapC((currentLap) => [...currentLap, time])
       setLastLap(`C: ${time}`)
     })
+
+    socket.on('galleryRoom', (data: any) => {
+      console.log('masuk')
+    })
   }
 
-  // const sendMessage = async () => {
-  //   socket.emit('createdMessage', { author: chosenUsername, message })
-  //   setMessages((currentMsg) => [
-  //     ...currentMsg,
-  //     { author: chosenUsername, message },
-  //   ])
-  //   setMessage('')
-  // }
+  const sendMessage = async () => {
+    socket.emit('galleryRoom', ['test', 'test'])
+    console.log('test')
+    // setMessages((currentMsg) => [
+    //   ...currentMsg,
+    //   { author: chosenUsername, message },
+    // ])
+    // setMessage('')
+  }
 
   useEffect(() => {
     socketInitializer()
@@ -49,7 +54,9 @@ export default function Home() {
 
   return (
     <main className="grid place-content-center min-h-screen">
-      <h1 className="text text-center text-6xl">{timer}</h1>
+      <h1 className="text text-center text-6xl" onClick={sendMessage}>
+        {timer}
+      </h1>
 
       <br />
 

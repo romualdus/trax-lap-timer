@@ -55,40 +55,59 @@ app.prepare().then(() => {
     process.exit(1)
   })
 
-  const io = new Server(httpServer, {})
+  const io = new Server(httpServer, {
+    cors: {
+      origin: '*',
+    },
+  })
   io.on('connection', (socket) => {
     const createdMessage = (msg: []) => {
       socket.broadcast.emit('newIncomingMessage', msg)
     }
 
     socket.on('createdMessage', createdMessage)
+    // welcomeGate
+    // galleryRoom
+    // mainStage
+
+    socket.on('galleryRoom', (msg) => {
+      socket.broadcast.emit('galleryRoom', msg)
+
+      console.log('galleryRoom', msg)
+    })
   })
 
-  const serialPort = new SerialPort({
-    path: '/dev/cu.usbserial-0001',
-    baudRate: 115200,
-  })
-  const parser = serialPort.pipe(new ReadlineParser({ delimiter: '\r\n' }))
-  parser.on('data', (data) => {
-    const [key, value] = data.split('=')
+  // SerialPort.list().then((ports) => {
+  //   ports.forEach(function (port) {
+  //     console.log(port.path)
+  //   })
+  // })
 
-    if (key === 'stopwatchTime') {
-      io.emit('stopwatchTime', value)
-    }
+  // const serialPort = new SerialPort({
+  //   path: '/dev/cu.usbserial-0001',
+  //   baudRate: 115200,
+  // })
+  // const parser = serialPort.pipe(new ReadlineParser({ delimiter: '\r\n' }))
+  // parser.on('data', (data) => {
+  //   const [key, value] = data.split('=')
 
-    if (key === 'lapA') {
-      io.emit('lapA', value)
-    }
+  //   if (key === 'stopwatchTime') {
+  //     io.emit('stopwatchTime', value)
+  //   }
 
-    if (key === 'lapB') {
-      io.emit('lapB', value)
-    }
+  //   if (key === 'lapA') {
+  //     io.emit('lapA', value)
+  //   }
 
-    if (key === 'lapC') {
-      io.emit('lapC', value)
-    }
-    // io.emit('newIncomingMessage', { author: 'ARDUINO', message: data })
-  })
+  //   if (key === 'lapB') {
+  //     io.emit('lapB', value)
+  //   }
+
+  //   if (key === 'lapC') {
+  //     io.emit('lapC', value)
+  //   }
+  //   // io.emit('newIncomingMessage', { author: 'ARDUINO', message: data })
+  // })
 
   httpServer.listen(port, () => {
     console.log(
