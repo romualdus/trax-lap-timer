@@ -65,29 +65,17 @@ app.prepare().then(() => {
   })
 
   const serialPort = new SerialPort({
-    path: '/dev/tty.usbserial-0001',
+    path: '/dev/cu.usbserial-0001',
     baudRate: 115200,
   })
   const parser = serialPort.pipe(new ReadlineParser({ delimiter: '\r\n' }))
   parser.on('data', (data) => {
     const [key, value] = data.split('=')
+    const [keyType, keyName] = key.split(':')
 
-    if (key === 'stopwatchTime') {
-      io.emit('stopwatchTime', value)
+    if (keyType === 'data') {
+      io.emit(keyName, value)
     }
-
-    if (key === 'lapA') {
-      io.emit('lapA', value)
-    }
-
-    if (key === 'lapB') {
-      io.emit('lapB', value)
-    }
-
-    if (key === 'lapC') {
-      io.emit('lapC', value)
-    }
-    // io.emit('newIncomingMessage', { author: 'ARDUINO', message: data })
   })
 
   httpServer.listen(port, () => {

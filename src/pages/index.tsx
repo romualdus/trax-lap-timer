@@ -5,32 +5,30 @@ let socket: any = null
 
 export default function Home() {
   const [timer, setTimer] = useState('0:00:000')
-  const [lapA, setLapA] = useState<Array<string>>([])
-  const [lapB, setLapB] = useState<Array<string>>([])
-  const [lapC, setLapC] = useState<Array<string>>([])
-  const [lastLap, setLastLap] = useState('')
+  const [result, setResult] = useState<Array<any>>([])
+
+  const addResult = (time: string, line: string) => {
+    setResult((currentResult) => [...currentResult, { time, line }])
+  }
 
   const socketInitializer = async () => {
     if (socket) return
     socket = io()
 
-    socket.on('stopwatchTime', (time: string) => {
-      setTimer(time)
+    socket.on('timer', (timer: string) => {
+      setTimer(timer)
     })
 
-    socket.on('lapA', (time: string) => {
-      setLapA((currentLap) => [...currentLap, time])
-      setLastLap(`A: ${time}`)
+    socket.on('finish-time-a', (time: string) => {
+      addResult(time, 'A')
     })
 
-    socket.on('lapB', (time: string) => {
-      setLapB((currentLap) => [...currentLap, time])
-      setLastLap(`B: ${time}`)
+    socket.on('finish-time-b', (time: string) => {
+      addResult(time, 'B')
     })
 
-    socket.on('lapC', (time: string) => {
-      setLapC((currentLap) => [...currentLap, time])
-      setLastLap(`C: ${time}`)
+    socket.on('finish-time-c', (time: string) => {
+      addResult(time, 'C')
     })
   }
 
@@ -53,37 +51,11 @@ export default function Home() {
 
       <br />
 
-      <div className="flex gap-14 justify-center h-32 text-center">
-        <div className="w-20">
-          <h2>Lap A</h2>
-          {lapA.map((lap, index) => (
-            <p key={`lapA-${index}`}>{lap}</p>
-          ))}
-        </div>
-        <div className="w-20">
-          <h2>Lap B</h2>
-          {lapB.map((lap, index) => (
-            <p key={`lapB-${index}`}>{lap}</p>
-          ))}
-        </div>
-        <div className="w-20">
-          <h2>Lap C</h2>
-          {lapC.map((lap, index) => (
-            <p key={`lapC-${index}`}>{lap}</p>
-          ))}
-        </div>
-      </div>
-
-      <div className="h-40">
-        {lapA.length >= 3 && lapB.length >= 3 && lapC.length >= 3 && (
-          <>
-            <h1 className="text-center text-7xl">{lastLap}</h1>
-            <h2 className="text-center text-7xl">
-              Lambat kayak situs pemerentah
-            </h2>
-          </>
-        )}
-      </div>
+      {result.map((res, index) => (
+        <p key={`result-${index}`}>
+          {index + 1}: {res.time} - {res.line}
+        </p>
+      ))}
     </main>
   )
 }
