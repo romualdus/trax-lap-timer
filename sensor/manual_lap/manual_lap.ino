@@ -52,6 +52,10 @@ void loop()
       isBFinished = false;
       isCFinished = false;
     }
+
+    if(receivedString == "final") {
+      finalLap = true;
+    }
   }
 
 
@@ -69,12 +73,6 @@ void loop()
     }
   } else {
     stopwatchTime = millis() - firstStopwatchTime;
-
-    if (stopwatchTime > 5000)
-    {
-      finalLap = true;
-    }
-
     String stopwatchTimeFormatted = timeFormatter(stopwatchTime);
     Serial.print(DATA_TIMER);
     Serial.println("=" + stopwatchTimeFormatted);

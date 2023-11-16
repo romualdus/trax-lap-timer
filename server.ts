@@ -62,14 +62,18 @@ app.prepare().then(() => {
 
   const io = new Server(httpServer, {})
   io.on('connection', (socket) => {
-    const createdMessage = (msg: []) => {
-      socket.broadcast.emit('newIncomingMessage', msg)
-    }
+    // const createdMessage = (msg: []) => {
+    //   socket.broadcast.emit('newIncomingMessage', msg)
+    // }
 
-    socket.on('createdMessage', createdMessage)
+    // socket.on('createdMessage', createdMessage)
 
     socket.on('reset-timer', () => {
       serialPort.write('reset')
+    })
+
+    socket.on('final-timer', () => {
+      serialPort.write('final')
     })
   })
 
