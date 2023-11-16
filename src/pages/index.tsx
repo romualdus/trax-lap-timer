@@ -41,18 +41,33 @@ export default function Home() {
   }, [])
 
   return (
-    <main className="grid place-content-center min-h-screen">
-      <h1 className="text text-center text-6xl">{timer}</h1>
+    <main className="min-h-screen grid place-items-center">
+      <div>
+        <h1 className="mb-6 font-mono text-8xl text-center">{timer}</h1>
+
+        <section className="grid grid-cols-3 gap-4 h-36">
+          <div className="p-6 border">
+            <h2 className="text-2xl text-center">A</h2>
+          </div>
+          <div className="p-6 border">
+            <h2 className="text-2xl text-center">B</h2>
+          </div>
+          <div className="p-6 border">
+            <h2 className="text-2xl text-center">C</h2>
+          </div>
+        </section>
+      </div>
+      {/* <h1 className="text text-center text-6xl">{timer}</h1>
 
       <button onClick={handleReset}>Reset</button>
 
-      <br />
+      <br /> */}
 
-      {result.map((res, index) => (
+      {/* {result.map((res, index) => (
         <p key={`result-${index}`}>
           {index + 1}: {res.time} - {res.line}
         </p>
-      ))}
+      ))} */}
     </main>
   )
 }
