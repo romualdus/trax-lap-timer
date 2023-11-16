@@ -55,6 +55,11 @@ app.prepare().then(() => {
     process.exit(1)
   })
 
+  const serialPort = new SerialPort({
+    path: '/dev/cu.usbserial-0001',
+    baudRate: 115200,
+  })
+
   const io = new Server(httpServer, {})
   io.on('connection', (socket) => {
     const createdMessage = (msg: []) => {
@@ -62,12 +67,12 @@ app.prepare().then(() => {
     }
 
     socket.on('createdMessage', createdMessage)
+
+    socket.on('reset-timer', () => {
+      serialPort.write('reset')
+    })
   })
 
-  const serialPort = new SerialPort({
-    path: '/dev/cu.usbserial-0001',
-    baudRate: 115200,
-  })
   const parser = serialPort.pipe(new ReadlineParser({ delimiter: '\r\n' }))
   parser.on('data', (data) => {
     const [key, value] = data.split('=')

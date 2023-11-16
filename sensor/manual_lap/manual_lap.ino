@@ -38,6 +38,23 @@ void setup()
 
 void loop()
 {
+  if(Serial.available() > 0) {
+    String receivedString = "";
+
+    while(Serial.available() > 0) {
+      receivedString += char(Serial.read());
+    }
+
+    if(receivedString == "reset") {
+      startStopwatch = false;
+      finalLap = false;
+      isAFinished = false;
+      isBFinished = false;
+      isCFinished = false;
+    }
+  }
+
+
   buttonStateA = digitalRead(BUTTON_PIN_A);
   buttonStateB = digitalRead(BUTTON_PIN_B);
   buttonStateC = digitalRead(BUTTON_PIN_C);

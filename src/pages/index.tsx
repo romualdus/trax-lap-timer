@@ -32,14 +32,9 @@ export default function Home() {
     })
   }
 
-  // const sendMessage = async () => {
-  //   socket.emit('createdMessage', { author: chosenUsername, message })
-  //   setMessages((currentMsg) => [
-  //     ...currentMsg,
-  //     { author: chosenUsername, message },
-  //   ])
-  //   setMessage('')
-  // }
+  const handleReset = async () => {
+    socket.emit('reset-timer')
+  }
 
   useEffect(() => {
     socketInitializer()
@@ -48,6 +43,8 @@ export default function Home() {
   return (
     <main className="grid place-content-center min-h-screen">
       <h1 className="text text-center text-6xl">{timer}</h1>
+
+      <button onClick={handleReset}>Reset</button>
 
       <br />
 
