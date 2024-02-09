@@ -60,6 +60,8 @@ app.prepare().then(() => {
     baudRate: 115200,
   })
 
+  let scoreA = 0
+
   const io = new Server(httpServer, {})
   io.on('connection', (socket) => {
     // const createdMessage = (msg: []) => {
@@ -69,10 +71,22 @@ app.prepare().then(() => {
     // socket.on('createdMessage', createdMessage)
 
     socket.on('reset-timer', () => {
+      socket.broadcast.emit('reset-timer')
       serialPort.write('reset')
     })
 
+    socket.on('add-scoreA', () => {
+      scoreA += 1
+      socket.emit('scoreA', scoreA)
+    })
+
+    socket.on('scoreA', () => {
+      scoreA += 1
+      io.emit('scoreA', scoreA)
+    })
+
     socket.on('final-timer', () => {
+      socket.broadcast.emit('final-timer')
       serialPort.write('final')
     })
   })
